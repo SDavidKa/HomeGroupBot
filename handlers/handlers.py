@@ -1,13 +1,13 @@
-from main import bot, dp
+from app import bot, dp, admin_id
 from aiogram.types import Message
-from config import admin_id
-from keyboards import resource_kb
+from keyboards.keyboards import resource_kb
 
 async def send_to_admin_start(dp):
     await bot.send_message(chat_id=admin_id, text="Бот запущен")
 
 async def send_to_admin_shutdown(dp):
     await bot.send_message(chat_id=admin_id, text="Бот отключен")
+
 # Первое приветствие пользователя
 @dp.message_handler(commands=['start'])
 async def startsMessage(message: Message):
@@ -26,7 +26,7 @@ async def getSchedule(message: Message):
 # Выдача материалов лидерского курса
 @dp.message_handler(lambda message: message.text == 'Лидерские курсы')
 async def getLeadershipCourse(message: Message):
-    await message.answer("Пока можешь глядуть, что-то здесь: https://www.youtube.com/c/wolrustv/playlists")
+    await message.answer("Пока можешь глянуть, что-то здесь: https://www.youtube.com/c/wolrustv/playlists")
 
 # Пожертвование
 @dp.message_handler(lambda message: message.text == 'Пожертвовать')
