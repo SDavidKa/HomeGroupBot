@@ -1,60 +1,57 @@
 from app import bot, dp, admin_id
 from aiogram.types import Message
-from keyboards.keyboards import menu_kb, resource_kb, donate_kb, webSite_kb
+from keyboards import Donate, Menu, Resource, LeadershipCourse
 
 async def send_to_admin_start(dp):
     await bot.send_message(chat_id=admin_id, text="Бот запущен")
 
-async def send_to_admin_shutdown(dp):
-    await bot.send_message(chat_id=admin_id, text="Бот отключен")
-
 # Первое приветствие пользователя
-@dp.message_handler(commands=['start'])
+@dp.message_handler(commands = ['start'])
 async def startsMessage(message: Message):
-    await message.answer("Выбери необходимый пункт в меню", reply_markup=menu_kb)
+    await message.answer("Выбери необходимый пункт в меню", reply_markup=Menu.menu_kb)
 
 # Возвращение к меню
-@dp.message_handler(lambda message: message.text == 'Вернуться в меню')
+@dp.message_handler(text = 'Вернуться в меню')
 async def getMenu(message: Message):
-    await message.answer("Выбери необходимый пункт в меню", reply_markup=menu_kb)
+    await message.answer("Выбери необходимый пункт в меню", reply_markup=Menu.menu_kb)
 
 # Переход в раздел "Материалы"
-@dp.message_handler(lambda message: message.text == 'Материалы')
+@dp.message_handler(text = 'Материалы')
 async def getResources(message: Message):
     await message.answer("Здесь ты найдешь конспекты и другие материалы для домашних групп."
-                         "\n\nВыбери раздел:", reply_markup=resource_kb)
+                         "\n\nВыбери раздел:", reply_markup=Resource.resource_kb)
 
 # Выдача конспектов воскресной проповеди
-@dp.message_handler(lambda message: message.text == 'Вс. проповеди')
+@dp.message_handler(text = 'Вс. проповеди')
 async def getPreaching(message: Message):
     await message.answer("Тема 1"
                          "\nНазвание конспекта 1")
 
 # Выдача конспектов
-@dp.message_handler(lambda message: message.text == 'Конспекты')
+@dp.message_handler(text = 'Конспекты')
 async def getNotes(message: Message):
     await message.answer("Тема 2"
                          "\nНазвание конспекта 2")
 
 # Выдача расписания
-@dp.message_handler(lambda message: message.text == 'Расписание')
+@dp.message_handler(text = 'Расписание')
 async def getSchedule(message: Message):
     await message.answer("Расписание ближайших мероприятий церкви в Москве")
 
 # Выдача материалов лидерского курса
-@dp.message_handler(lambda message: message.text == 'Лидерские курсы')
+@dp.message_handler(text = 'Лидерские курсы')
 async def getLeadershipCourse(message: Message):
-    await message.answer("Здесь ты найдешь материалы для лидеров домашних групп: https://www.youtube.com/c/wolrustv/playlists", reply_markup=webSite_kb)
+    await message.answer("Здесь ты найдешь материалы для лидеров домашних групп:", reply_markup=LeadershipCourse.leadershipCourse_kb)
 
 # Переход в раздел "Пожертвование"
-@dp.message_handler(lambda message: message.text == 'Пожертвовать')
+@dp.message_handler(text = 'Пожертвовать')
 async def getDonate(message: Message):
     await message.answer("Благодаря твоей поддержке мы можем" +
     "\nпродолжать насаждать церкви и распространять Евангелие!" +
-    "\n\nВыбери, на то что ты пожертвуешь:", reply_markup=donate_kb)
+    "\n\nВыбери, на то что ты пожертвуешь:", reply_markup=Donate.donate_kb)
 
 # Пункт "Строим церковь"
-@dp.message_handler(lambda message: message.text == 'Строим церковь')
+@dp.message_handler(text = 'Строим церковь')
 async def getDonate_BuildChurch(message: Message):
     await message.answer("Мы купили второе здание и сейчас нам предстоит совершить" +
     "\nследующий шаг - перестроить его и сделать ремонт, чтобы мы смогли" +
@@ -62,27 +59,27 @@ async def getDonate_BuildChurch(message: Message):
     "\n\nВведи сумму пожертвования:")
 
 # Пункт "Израиль"
-@dp.message_handler(lambda message: message.text =='Израиль')
+@dp.message_handler(text ='Израиль')
 async def getDonate_Israel(message: Message):
     await message.answer("Пока пользуйся этим сайтом: https://wolrus.org/donate")
 
 # Пункт "До края земли"
-@dp.message_handler(lambda message: message.text =='До края земли')
+@dp.message_handler(text ='До края земли')
 async def getDonate_ToEndOfEarth(message: Message):
     await message.answer("Пока пользуйся этим сайтом: https://wolrus.org/donate")
 
 # Пункт "500 по 500"
-@dp.message_handler(lambda message: message.text =='500 по 500')
+@dp.message_handler(text ='500 по 500')
 async def getDonate_500on500(message: Message):
     await message.answer("Пока пользуйся этим сайтом: https://wolrus.org/donate")
 
 # Пункт "Слово жизни"
-@dp.message_handler(lambda message: message.text =='Слово жизни')
+@dp.message_handler(text ='Слово жизни')
 async def getDonate_WordOfLife(message: Message):
     await message.answer("Пока пользуйся этим сайтом: https://wolrus.org/donate")
 
 # Пункт "Реквизиты"
-@dp.message_handler(lambda message: message.text =='Реквизиты')
+@dp.message_handler(text ='Реквизиты')
 async def getDonate_Requisite(message: Message):
     await message.answer("Местная религиозная организация" +
     "\nБиблийский центр христиан" +
