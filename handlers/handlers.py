@@ -1,5 +1,5 @@
 from app import bot, dp, admin_id
-from aiogram.types import Message
+from aiogram.types import Message, InputMediaDocument, CallbackQuery
 from keyboards import donate, menu, resource, leadershipCourse
 
 async def send_to_admin_start(dp):
@@ -31,6 +31,11 @@ async def getPreaching(message: Message):
 @dp.message_handler(text = 'Конспекты')
 async def getNotes(message: Message):
     await message.answer("Выбери тему:", reply_markup=resource.notesName_kb)
+
+@dp.callback_query_handler(text='inputFile_1')
+async def getFile(call: CallbackQuery):
+    doc=InputMediaDocument(resource.ulrsDocument[1])
+    await call.message.answer_document(document=[doc])
 
 # Выдача расписания
 @dp.message_handler(text = 'Расписание')
