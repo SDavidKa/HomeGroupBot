@@ -27,10 +27,7 @@ def getListNotes(data: dict, table_name: str):
     for note in data:
         names.append(note['fields']['Name'])
 
-    if len(names) % 2 or not(len(names) % 3):
-        stop = counter + 3
-    else:
-        stop = counter + 4
+    stop = counter + 3
     while counter < stop:
         text += f"\n{counter + 1}) {names[counter]}"
         counter += 1
@@ -49,10 +46,7 @@ async def getNextListNotes(table_name: str, call: CallbackQuery):
     counter = table_state['table_count']
 
     if len(names) >= (counter + 3) > 0:
-        if len(names) % 2 or not(len(names) % 3):
-            stop = counter + 3
-        else:
-            stop = counter + 4
+        stop = counter + 3
 
         while counter < stop:
             text += f"\n{counter + 1}) {names[counter]}"
@@ -76,24 +70,15 @@ async def getPreviousListNotes(table_name: str, call: CallbackQuery):
     answer = f"Выбери тему таблицы «{table_name}»:"
     text = ""
     names = table_state['list_name']
-    if len(names) % 2 or not(len(names) % 3):
-        if table_state['table_count'] >= 6:
-            counter = table_state['table_count'] - 6
-        elif len(names) % table_state['table_count']:
-            counter = 0
-        else:
-            counter = table_state['table_count'] - 3
+    if table_state['table_count'] >= 6:
+        counter = table_state['table_count'] - 6
+    elif len(names) % table_state['table_count'] or table_state['table_count'] == 5:
+        counter = 0
     else:
-        if table_state['table_count'] >= 8:
-            counter = table_state['table_count'] - 8
-        else:
-            counter = table_state['table_count'] - 4
+        counter = table_state['table_count'] - 3
 
     if (counter + 3) > 0:
-        if len(names) % 2 or not(len(names) % 6):
-            stop = counter + 3
-        else:
-            stop = counter + 4
+        stop = counter + 3
 
         while counter < stop:
             text += f"\n{counter + 1}) {names[counter]}"
@@ -104,19 +89,52 @@ async def getPreviousListNotes(table_name: str, call: CallbackQuery):
             counter += 1
 
     table_state['table_count'] = counter
-    if counter == 3 or counter == 4:
+    if counter == 3:
         await call.answer(text="Начало списка")
 
     return answer + text
 
 # Метод вывода ссылки на документ
 def getLinkDocumentFromNotes(call: CallbackQuery):
-    data = getAirtableData("конспекты для окружных лидеров")
+    global table_state
+    data = getAirtableData(table_state['table_name'])
+    counter = table_state['table_count'] - 2
     link = ""
+    name = ""
+    message = call.message.text
+
+    names = message.split("\n")
+    names.pop(0)
+
     if call.data == "first":
+        for n in names:
+            if not (n.find(f"{counter})")):
+                new_name = n.split(f"{counter}) ")
+                new_name.pop(0)
+                name = new_name[0]
         for note in data:
-            if note['fields']['Name'] == "Как быть счастливым лидером ":
-                link = note['fields']['Name']['Attachments'][0]['url']
+            if note['fields']['Name'] == name:
+                link = note['fields']['Attachments'][0]['url']
+    elif call.data == "second":
+        counter = counter + 1
+        for n in names:
+            if not (n.find(f"{counter})")):
+                new_name = n.split(f"{counter}) ")
+                new_name.pop(0)
+                name = new_name[0]
+        for note in data:
+            if note['fields']['Name'] == name:
+                link = note['fields']['Attachments'][0]['url']
+    elif call.data == "third":
+        counter = counter + 2
+        for n in names:
+            if not (n.find(f"{counter})")):
+                new_name = n.split(f"{counter}) ")
+                new_name.pop(0)
+                name = new_name[0]
+        for note in data:
+            if note['fields']['Name'] == name:
+                link = note['fields']['Attachments'][0]['url']
     return link
 
 # Выдача конспектов воскресной проповеди
@@ -154,7 +172,6 @@ async def getNotesFromTableMainDocs(call: CallbackQuery):
     text = getListNotes(data_from_airtable, call.data)
     await call.message.edit_text(text, reply_markup=rs.notes_kb)
 
-
 @dp.callback_query_handler(text="обучающие аудио для лидеров")
 async def getNotesFromTableMainDocs(call: CallbackQuery):
     data_from_airtable = getAirtableData(call.data)
@@ -173,11 +190,11 @@ async def getFirstNotesFiles(call: CallbackQuery):
 
 @dp.callback_query_handler(text="second")
 async def getSecondNotesFiles(call: CallbackQuery):
-    await call.message.answer("На")
+    await call.message.answer_document(InputFile.from_url(getLinkDocumentFromNotes(call)), caption="Вот твой документ")
 
 @dp.callback_query_handler(text="third")
 async def getThirdNotesFiles(call: CallbackQuery):
-    await call.message.answer("На")
+    await call.message.answer_document(InputFile.from_url(getLinkDocumentFromNotes(call)), caption="Вот твой документ")
 
 @dp.callback_query_handler(text="prev")
 async def getPreviousNotesLists(call: CallbackQuery):
@@ -193,8 +210,3 @@ async def getNextNotesLists(call: CallbackQuery):
 async def getNextNotesLists(call: CallbackQuery):
     await call.answer(cache_time=1)
     await call.message.edit_text("Выбери таблицу", reply_markup=rs.notes_menu_kb)
-
-# @dp.callback_query_handler(text='inputFile_1')
-# async def getFile(call: CallbackQuery):
-#     doc=InputMediaDocument(rs.ulrsDocument[1])
-#     await call.message.answer_document(document=[doc])
