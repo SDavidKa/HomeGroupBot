@@ -8,7 +8,8 @@ table_state = {
     "table_count": 3,
     "table_stop": 3,
     "table_data": dict(),
-    "list_name": list()
+    "list_name": list(),
+    "message_id": int
 }
 # Метод получения данных с AirTable
 def getAirtableData(table_name: str):
@@ -140,13 +141,14 @@ def getLinkDocumentFromNotes(call: CallbackQuery):
 # Выдача конспектов воскресной проповеди
 @dp.message_handler(text='Вс. проповеди')
 async def getPreaching(message: Message):
-    await message.answer("Тема 1"
-                         "\nНазвание конспекта 1")
+    await message.answer("Тема 1\nНазвание конспекта 1")
+    table_state['message_id'] = message.message_id
 
 # Выдача конспектов
 @dp.message_handler(text='Конспекты')
 async def getNotes(message: Message):
     await message.answer("Выбери таблицу", reply_markup=rs.notes_menu_kb)
+    table_state['message_id'] = message.message_id
 
 @dp.callback_query_handler(text="Главные документы")
 async def getNotesFromTableMainDocs(call: CallbackQuery):
@@ -187,14 +189,20 @@ async def getNotesFromTableMainDocs(call: CallbackQuery):
 @dp.callback_query_handler(text="first")
 async def getFirstNotesFiles(call: CallbackQuery):
     await call.message.answer_document(InputFile.from_url(getLinkDocumentFromNotes(call)), caption="Вот твой документ")
+    await call.message.answer(getListNotes(table_state['table_data'], table_state['table_name']), reply_markup=rs.notes_kb)
+    await call.message.delete()
 
 @dp.callback_query_handler(text="second")
 async def getSecondNotesFiles(call: CallbackQuery):
     await call.message.answer_document(InputFile.from_url(getLinkDocumentFromNotes(call)), caption="Вот твой документ")
+    await call.message.answer(getListNotes(table_state['table_data'], table_state['table_name']), reply_markup=rs.notes_kb)
+    await call.message.delete()
 
 @dp.callback_query_handler(text="third")
 async def getThirdNotesFiles(call: CallbackQuery):
     await call.message.answer_document(InputFile.from_url(getLinkDocumentFromNotes(call)), caption="Вот твой документ")
+    await call.message.answer(getListNotes(table_state['table_data'], table_state['table_name']), reply_markup=rs.notes_kb)
+    await call.message.delete()
 
 @dp.callback_query_handler(text="prev")
 async def getPreviousNotesLists(call: CallbackQuery):
