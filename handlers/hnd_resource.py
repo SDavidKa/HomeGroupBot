@@ -1,28 +1,22 @@
 from app import dp, airtable_api_key, airtable_base_id
 from aiogram.types import Message, InputFile, CallbackQuery
-from keyboards import resource as rs
-import airtable as at
+from keyboards import kb_resource as rs
+from asgiref.sync import sync_to_async
+import airtable
 
-table_state = {
-    "table_name": "",
-    "table_count": 3,
-    "table_stop": 3,
-    "table_data": dict(),
-    "list_name": list(),
-    "message_id": int
-}
+# Глобальная переменная
+table_state = dict()
+
 # Метод получения данных с AirTable
-def getAirtableData(table_name: str):
-    airtable = at.Airtable(airtable_base_id, table_name, airtable_api_key)
-    return airtable.get_all()
+async def getAirtableData(table_name: str):
+    table = await sync_to_async(airtable.Airtable)(airtable_base_id, table_name, airtable_api_key)
+    return table.get_all()
 
 # Метод вывода списка тем
-def getListNotes(data: dict, table_name: str):
+async def getListNotes(data: dict, table_name: str, call: CallbackQuery):
     global table_state
     answer = f"Выбери тему таблицы «{table_name}»:"
     text = ""
-    table_state['table_name'] = table_name
-    table_state['table_data'] = data
     counter = 0
     names = list()
     for note in data:
@@ -33,18 +27,23 @@ def getListNotes(data: dict, table_name: str):
         text += f"\n{counter + 1}) {names[counter]}"
         counter += 1
 
-    table_state['table_count'] = counter
-    table_state['list_name'] = names
+    table_state.update(user_id=call.from_user.id)
+    table_state[call.from_user.id] = {
+        'table_name': table_name,
+        'table_data': data,
+        'table_count': counter,
+        'list_name': names
+    }
 
     return answer + text
 
 # Метод перелистывания списка тем вперед
-async def getNextListNotes(table_name: str, call: CallbackQuery):
+async def getNextListNotes(call: CallbackQuery):
     global table_state
-    answer = f"Выбери тему таблицы «{table_name}»:"
+    answer = f"Выбери тему таблицы «{table_state[call.from_user.id]['table_name']}»:"
     text = ""
-    names = table_state['list_name']
-    counter = table_state['table_count']
+    names = table_state[call.from_user.id]['list_name']
+    counter = table_state[call.from_user.id]['table_count']
 
     if len(names) >= (counter + 3) > 0:
         stop = counter + 3
@@ -58,7 +57,7 @@ async def getNextListNotes(table_name: str, call: CallbackQuery):
             text += f"\n{counter + 1}) {names[counter]}"
             counter += 1
 
-    table_state['table_count'] = counter
+    table_state[call.from_user.id]['table_count'] = counter
 
     if counter >= len(names):
         await call.answer(text="Конец списка")
@@ -66,17 +65,18 @@ async def getNextListNotes(table_name: str, call: CallbackQuery):
     return answer + text
 
 # Метод перелистывания списка тем назад
-async def getPreviousListNotes(table_name: str, call: CallbackQuery):
+async def getPreviousListNotes(call: CallbackQuery):
     global table_state
-    answer = f"Выбери тему таблицы «{table_name}»:"
+    answer = f"Выбери тему таблицы «{table_state[call.from_user.id]['table_name']}»:"
     text = ""
-    names = table_state['list_name']
-    if table_state['table_count'] >= 6:
-        counter = table_state['table_count'] - 6
-    elif len(names) % table_state['table_count'] or table_state['table_count'] == 5:
+    names = table_state[call.from_user.id]['list_name']
+    counter = table_state[call.from_user.id]['table_count']
+    if counter >= 6:
+        counter = counter - 6
+    elif len(names) % counter or counter == 5:
         counter = 0
     else:
-        counter = table_state['table_count'] - 3
+        counter = counter - 3
 
     if (counter + 3) > 0:
         stop = counter + 3
@@ -89,17 +89,17 @@ async def getPreviousListNotes(table_name: str, call: CallbackQuery):
             text += f"\n{counter + 1}) {names[counter]}"
             counter += 1
 
-    table_state['table_count'] = counter
+    table_state[call.from_user.id]['table_count'] = counter
     if counter == 3:
         await call.answer(text="Начало списка")
 
     return answer + text
 
 # Метод вывода ссылки на документ
-def getLinkDocumentFromNotes(call: CallbackQuery):
+async def getLinkDocumentFromNotes(call: CallbackQuery):
     global table_state
-    data = getAirtableData(table_state['table_name'])
-    counter = table_state['table_count'] - 2
+    data = await getAirtableData(table_state[call.from_user.id]['table_name'])
+    counter = table_state[call.from_user.id]['table_count'] - 2
     link = ""
     name = ""
     message = call.message.text
@@ -142,7 +142,6 @@ def getLinkDocumentFromNotes(call: CallbackQuery):
 @dp.message_handler(text='Вс. проповеди')
 async def getPreaching(message: Message):
     await message.answer("Тема 1\nНазвание конспекта 1")
-    table_state['message_id'] = message.message_id
 
 # Выдача конспектов
 @dp.message_handler(text='Конспекты')
@@ -152,66 +151,72 @@ async def getNotes(message: Message):
 
 @dp.callback_query_handler(text="Главные документы")
 async def getNotesFromTableMainDocs(call: CallbackQuery):
-    data_from_airtable = getAirtableData(call.data)
-    text = getListNotes(data_from_airtable, call.data)
+    data_from_airtable = await getAirtableData(call.data)
+    text = await getListNotes(data_from_airtable, call.data, call)
     await call.message.edit_text(text, reply_markup=rs.notes_kb)
 
 @dp.callback_query_handler(text="Гостеприимство")
 async def getNotesFromTableMainDocs(call: CallbackQuery):
-    data_from_airtable = getAirtableData(call.data)
-    text = getListNotes(data_from_airtable, call.data)
+    data_from_airtable = await getAirtableData(call.data)
+    text = await getListNotes(data_from_airtable, call.data, call)
     await call.message.edit_text(text, reply_markup=rs.notes_kb)
 
 @dp.callback_query_handler(text="Конспекты с ДГ")
 async def getNotesFromTableMainDocs(call: CallbackQuery):
-    data_from_airtable = getAirtableData(call.data)
-    text = getListNotes(data_from_airtable, call.data)
+    data_from_airtable = await getAirtableData(call.data)
+    text = await getListNotes(data_from_airtable, call.data, call)
     await call.message.edit_text(text, reply_markup=rs.notes_kb)
 
 @dp.callback_query_handler(text="Книги для обязательного прочтения")
 async def getNotesFromTableMainDocs(call: CallbackQuery):
-    data_from_airtable = getAirtableData(call.data)
-    text = getListNotes(data_from_airtable, call.data)
+    data_from_airtable = await getAirtableData(call.data)
+    text = await getListNotes(data_from_airtable, call.data, call)
     await call.message.edit_text(text, reply_markup=rs.notes_kb)
 
 @dp.callback_query_handler(text="обучающие аудио для лидеров")
 async def getNotesFromTableMainDocs(call: CallbackQuery):
-    data_from_airtable = getAirtableData(call.data)
-    text = getListNotes(data_from_airtable, call.data)
+    data_from_airtable = await getAirtableData(call.data)
+    text = await getListNotes(data_from_airtable, call.data, call)
     await call.message.edit_text(text, reply_markup=rs.notes_kb)
 
 @dp.callback_query_handler(text="конспекты для окружных лидеров")
 async def getNotesFromTableMainDocs(call: CallbackQuery):
-    data_from_airtable = getAirtableData(call.data)
-    text = getListNotes(data_from_airtable, call.data)
+    data_from_airtable = await getAirtableData(call.data)
+    text = await getListNotes(data_from_airtable, call.data, call)
     await call.message.edit_text(text, reply_markup=rs.notes_kb)
 
 @dp.callback_query_handler(text="first")
 async def getFirstNotesFiles(call: CallbackQuery):
-    await call.message.answer_document(InputFile.from_url(getLinkDocumentFromNotes(call)), caption="Вот твой документ")
-    await call.message.answer(getListNotes(table_state['table_data'], table_state['table_name']), reply_markup=rs.notes_kb)
+    await call.message.answer_document(InputFile.from_url(await getLinkDocumentFromNotes(call)), caption="Вот твой документ")
+    await call.message.answer(await getListNotes(
+        table_state[call.from_user.id]['table_data'],
+        table_state[call.from_user.id]['table_name'], call), reply_markup=rs.notes_kb)
     await call.message.delete()
 
 @dp.callback_query_handler(text="second")
 async def getSecondNotesFiles(call: CallbackQuery):
-    await call.message.answer_document(InputFile.from_url(getLinkDocumentFromNotes(call)), caption="Вот твой документ")
-    await call.message.answer(getListNotes(table_state['table_data'], table_state['table_name']), reply_markup=rs.notes_kb)
+    await call.message.answer_document(InputFile.from_url(await getLinkDocumentFromNotes(call)), caption="Вот твой документ")
+    await call.message.answer(await getListNotes(
+        table_state[call.from_user.id]['table_data'],
+        table_state[call.from_user.id]['table_name'], call), reply_markup=rs.notes_kb)
     await call.message.delete()
 
 @dp.callback_query_handler(text="third")
 async def getThirdNotesFiles(call: CallbackQuery):
-    await call.message.answer_document(InputFile.from_url(getLinkDocumentFromNotes(call)), caption="Вот твой документ")
-    await call.message.answer(getListNotes(table_state['table_data'], table_state['table_name']), reply_markup=rs.notes_kb)
+    await call.message.answer_document(InputFile.from_url(await getLinkDocumentFromNotes(call)), caption="Вот твой документ")
+    await call.message.answer(await getListNotes(
+        table_state[call.from_user.id]['table_data'],
+        table_state[call.from_user.id]['table_name'], call), reply_markup=rs.notes_kb)
     await call.message.delete()
 
 @dp.callback_query_handler(text="prev")
 async def getPreviousNotesLists(call: CallbackQuery):
-    text = await getPreviousListNotes(table_state['table_name'], call)
+    text = await getPreviousListNotes(call)
     await call.message.edit_text(text, reply_markup=rs.notes_kb)
 
 @dp.callback_query_handler(text="next")
 async def getNextNotesLists(call: CallbackQuery):
-    text = await getNextListNotes(table_state['table_name'], call)
+    text = await getNextListNotes(call)
     await call.message.edit_text(text, reply_markup=rs.notes_kb)
 
 @dp.callback_query_handler(text="back_to_table_list")
