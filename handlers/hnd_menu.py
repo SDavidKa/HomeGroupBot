@@ -13,21 +13,17 @@ async def startsMessage(message: Message):
     await message.answer("Выбери необходимый пункт в меню", reply_markup=kb_menu.menu_kb)
     print(await getUserLogsFromMessage(message))
 
+# Выдача конспектов
+@dp.message_handler(text='Конспекты')
+async def getNotes(message: Message):
+    await message.answer("Выбери таблицу", reply_markup=kb_resource.notes_menu_kb)
+    print(await getUserLogsFromMessage(message))
 
 # Возвращение к меню
 @dp.message_handler(text='Вернуться в меню')
 async def getMenu(message: Message):
     await message.answer("Выбери необходимый пункт в меню", reply_markup=kb_menu.menu_kb)
     print(await getUserLogsFromMessage(message))
-
-
-# Переход в раздел "Материалы"
-@dp.message_handler(text='Материалы')
-async def getResources(message: Message):
-    await message.answer("Здесь ты найдешь конспекты и другие материалы для домашних групп."
-                         "\n\nВыбери раздел:", reply_markup=kb_resource.resource_kb)
-    print(await getUserLogsFromMessage(message))
-
 
 # Выдача расписания
 @dp.message_handler(text='Расписание')
@@ -45,14 +41,8 @@ async def getLeadershipCourse(message: Message):
 
 
 # Переход в раздел "Пожертвование"
-@dp.message_handler(text='Пожертвовать')
+@dp.message_handler(text='Пожертвование')
 async def getDonate(message: Message):
     await message.answer("Благодаря твоей поддержке мы можем" +
-                         "\nпродолжать насаждать церкви и распространять Евангелие!" +
-                         "\n\nВыбери, на то что ты пожертвуешь:", reply_markup=kb_donate.donate_kb)
+                         "\nпродолжать насаждать церкви и распространять Евангелие!", reply_markup=kb_donate.donate_kb)
     print(await getUserLogsFromMessage(message))
-
-# Неизвестная команда
-# @dp.message_handler()
-# async def unknownCommands(message: Message):
-#     await message.reply("Незнаю такой команды. Выбери что-то из меню")

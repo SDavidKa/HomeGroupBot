@@ -3,13 +3,13 @@ from aiogram.types import ReplyKeyboardMarkup, ReplyKeyboardRemove, KeyboardButt
 # Группировка кнопок для Меню
 menu_kb = ReplyKeyboardMarkup(keyboard=[
     [
-        KeyboardButton('Материалы'),
+        KeyboardButton('Конспекты'),
         KeyboardButton('Расписание')
     ],
     [
         KeyboardButton('Лидерские курсы')
     ],
     [
-        KeyboardButton('Пожертвовать')
+        KeyboardButton('Пожертвование')
     ]
 ], resize_keyboard=True)
