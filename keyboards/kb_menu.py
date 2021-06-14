@@ -1,4 +1,4 @@
-from aiogram.types import ReplyKeyboardMarkup, ReplyKeyboardRemove, KeyboardButton
+from aiogram.types import ReplyKeyboardMarkup, KeyboardButton
 
 # Группировка кнопок для Меню
 menu_kb = ReplyKeyboardMarkup(keyboard=[

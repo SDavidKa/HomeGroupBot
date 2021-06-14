@@ -1,4 +1,5 @@
-from app import dp, getUserLogsFromMessage
+from app import dp
+from modules import getUserLogsFromMessage
 from aiogram.types import Message
 
 
