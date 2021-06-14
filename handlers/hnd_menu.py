@@ -29,7 +29,7 @@ async def getResources(message: Message):
 # Выдача расписания
 @dp.message_handler(text='Расписание')
 async def getScheduler(message: Message):
-    data_from_airtable = await getAirtableData(message.text)
+    data_from_airtable = await getAirtableData(message.text, 'Date_time_meeting')
     text = await getListOfEvents(data_from_airtable)
     await message.answer(text)
     print(await getUserLogsFromMessage(message))
@@ -55,11 +55,10 @@ async def getListOfEvents(data: list):
     pattern_out = "%d.%m.%y %H:%M"
     date_now = datetime.now().strftime(pattern_out)
     check = True
-
     for note in data:
         date_meeting = datetime.strptime(note['fields']['Date_time_meeting'], pattern_in).strftime(pattern_out)
         if date_meeting > date_now:
-            text += f"\n* {note['fields']['Name']} - {date_meeting}"
+            text += f"\n● {note['fields']['Name']} - {date_meeting}"
             check = False
     if check:
         text = "Пока что нет запланированных мероприятий"

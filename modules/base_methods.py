@@ -4,9 +4,9 @@ from asgiref.sync import sync_to_async
 import airtable
 
 # Метод получения данных с AirTable
-async def getAirtableData(table_name: str):
+async def getAirtableData(table_name: str, sort_field: str):
     table = await sync_to_async(airtable.Airtable)(airtable_base_id, table_name, airtable_api_key)
-    return table.get_all()
+    return table.get_all(sort=sort_field)
 
 # Логи
 async def getUserLogsFromCallbackQuery(call: CallbackQuery):

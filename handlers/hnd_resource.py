@@ -21,7 +21,7 @@ async def getNotes(message: Message):
 
 @dp.callback_query_handler(text="Главные документы")
 async def getNotesFromTableMainDocs(call: CallbackQuery):
-    data_from_airtable = await getAirtableData(call.data)
+    data_from_airtable = await getAirtableData(call.data, 'Name')
     text = await getListNotes(data_from_airtable, call.data, call)
     markup = rs.notes_kb(table_state[call.from_user.id]['table_count'], len(table_state[call.from_user.id]['list_name']))
     await call.message.edit_text(text, reply_markup=markup)
@@ -29,7 +29,7 @@ async def getNotesFromTableMainDocs(call: CallbackQuery):
 
 @dp.callback_query_handler(text="Гостеприимство")
 async def getNotesFromTableMainDocs(call: CallbackQuery):
-    data_from_airtable = await getAirtableData(call.data)
+    data_from_airtable = await getAirtableData(call.data, 'Name')
     text = await getListNotes(data_from_airtable, call.data, call)
     markup = rs.notes_kb(table_state[call.from_user.id]['table_count'], len(table_state[call.from_user.id]['list_name']))
     await call.message.edit_text(text, reply_markup=markup)
@@ -37,7 +37,7 @@ async def getNotesFromTableMainDocs(call: CallbackQuery):
 
 @dp.callback_query_handler(text="Конспекты с ДГ")
 async def getNotesFromTableMainDocs(call: CallbackQuery):
-    data_from_airtable = await getAirtableData(call.data)
+    data_from_airtable = await getAirtableData(call.data, 'Name')
     text = await getListNotes(data_from_airtable, call.data, call)
     markup = rs.notes_kb(table_state[call.from_user.id]['table_count'], len(table_state[call.from_user.id]['list_name']))
     await call.message.edit_text(text, reply_markup=markup)
@@ -45,7 +45,7 @@ async def getNotesFromTableMainDocs(call: CallbackQuery):
 
 @dp.callback_query_handler(text="Книги для обязательного прочтения")
 async def getNotesFromTableMainDocs(call: CallbackQuery):
-    data_from_airtable = await getAirtableData(call.data)
+    data_from_airtable = await getAirtableData(call.data, 'Name')
     text = await getListNotes(data_from_airtable, call.data, call)
     markup = rs.notes_kb(table_state[call.from_user.id]['table_count'], len(table_state[call.from_user.id]['list_name']))
     await call.message.edit_text(text, reply_markup=markup)
@@ -53,7 +53,7 @@ async def getNotesFromTableMainDocs(call: CallbackQuery):
 
 @dp.callback_query_handler(text="обучающие аудио для лидеров")
 async def getNotesFromTableMainDocs(call: CallbackQuery):
-    data_from_airtable = await getAirtableData(call.data)
+    data_from_airtable = await getAirtableData(call.data, 'Name')
     text = await getListNotes(data_from_airtable, call.data, call)
     markup = rs.notes_kb(table_state[call.from_user.id]['table_count'], len(table_state[call.from_user.id]['list_name']))
     await call.message.edit_text(text, reply_markup=markup)
@@ -61,7 +61,7 @@ async def getNotesFromTableMainDocs(call: CallbackQuery):
 
 @dp.callback_query_handler(text="конспекты для окружных лидеров")
 async def getNotesFromTableMainDocs(call: CallbackQuery):
-    data_from_airtable = await getAirtableData(call.data)
+    data_from_airtable = await getAirtableData(call.data, 'Name')
     text = await getListNotes(data_from_airtable, call.data, call)
     markup = rs.notes_kb(table_state[call.from_user.id]['table_count'], len(table_state[call.from_user.id]['list_name']))
     await call.message.edit_text(text, reply_markup=markup)
@@ -206,7 +206,7 @@ async def getNameOfDocument(call: CallbackQuery):
 # Метод вывода ссылки на документ
 async def getLinkDocumentFromNotes(call: CallbackQuery):
     global table_state
-    data = await getAirtableData(table_state[call.from_user.id]['table_name'])
+    data = await getAirtableData(table_state[call.from_user.id]['table_name'], 'Name')
     link = ""
     name = await getNameOfDocument(call)
 
