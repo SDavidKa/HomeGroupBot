@@ -1,11 +1,11 @@
-from app import bot, dp, admin_id, getUserLogsFromMessage
+from app import bot, dp, admin_id
+from modules import getAirtableData, getUserLogsFromMessage
 from aiogram.types import Message
 from keyboards import kb_donate, kb_menu, kb_resource, kb_leadershipCourse
-
+from datetime import datetime
 
 async def send_to_admin_start(dp):
     await bot.send_message(chat_id=admin_id, text="Бот запущен")
-
 
 # Первое приветствие пользователя
 @dp.message_handler(commands=['start'])
@@ -27,8 +27,10 @@ async def getMenu(message: Message):
 
 # Выдача расписания
 @dp.message_handler(text='Расписание')
-async def getSchedule(message: Message):
-    await message.answer("Расписание ближайших мероприятий церкви в Москве")
+async def getScheduler(message: Message):
+    data_from_airtable = await getAirtableData(message.text, 'Date_time_meeting')
+    text = await getListOfEvents(data_from_airtable)
+    await message.answer(text)
     print(await getUserLogsFromMessage(message))
 
 
@@ -46,3 +48,19 @@ async def getDonate(message: Message):
     await message.answer("Благодаря твоей поддержке мы можем" +
                          "\nпродолжать насаждать церкви и распространять Евангелие!", reply_markup=kb_donate.donate_kb)
     print(await getUserLogsFromMessage(message))
+
+async def getListOfEvents(data: list):
+    text = "Расписание ближайших мероприятий церкви в Москве:\n"
+    pattern_in = "%Y-%m-%dT%H:%M:%S.%f%z"
+    pattern_out = "%d.%m.%y %H:%M"
+    date_now = datetime.now().strftime(pattern_out)
+    check = True
+    for note in data:
+        date_meeting = datetime.strptime(note['fields']['Date_time_meeting'], pattern_in).strftime(pattern_out)
+        if date_meeting > date_now:
+            text += f"\n• {note['fields']['Name']} - {date_meeting}"
+            check = False
+    if check:
+        text = "Пока что нет запланированных мероприятий"
+
+    return text
