@@ -13,12 +13,6 @@ async def startsMessage(message: Message):
     await message.answer("Выбери необходимый пункт в меню", reply_markup=kb_menu.menu_kb)
     print(await getUserLogsFromMessage(message))
 
-# Возвращение к меню
-@dp.message_handler(text='Вернуться в меню')
-async def getMenu(message: Message):
-    await message.answer("Выбери необходимый пункт в меню", reply_markup=kb_menu.menu_kb)
-    print(await getUserLogsFromMessage(message))
-
 # Переход в раздел "Материалы"
 @dp.message_handler(text='Материалы')
 async def getResources(message: Message):
@@ -42,7 +36,7 @@ async def getLeadershipCourse(message: Message):
     print(await getUserLogsFromMessage(message))
 
 # Переход в раздел "Пожертвование"
-@dp.message_handler(text='Пожертвовать')
+@dp.message_handler(text='Пожертвование')
 async def getDonate(message: Message):
     await message.answer("Благодаря твоей поддержке мы можем" +
                          "\nпродолжать насаждать церкви и распространять Евангелие!" +
@@ -58,7 +52,7 @@ async def getListOfEvents(data: list):
     for note in data:
         date_meeting = datetime.strptime(note['fields']['Date_time_meeting'], pattern_in).strftime(pattern_out)
         if date_meeting > date_now:
-            text += f"\n● {note['fields']['Name']} - {date_meeting}"
+            text += f"\n● {note['fields']['Name']} – {date_meeting}"
             check = False
     if check:
         text = "Пока что нет запланированных мероприятий"

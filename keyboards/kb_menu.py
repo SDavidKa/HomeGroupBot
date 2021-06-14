@@ -10,6 +10,6 @@ menu_kb = ReplyKeyboardMarkup(keyboard=[
         KeyboardButton('Лидерские курсы')
     ],
     [
-        KeyboardButton('Пожертвовать')
+        KeyboardButton('Пожертвование')
     ]
 ], resize_keyboard=True)

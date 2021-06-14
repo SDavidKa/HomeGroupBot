@@ -11,6 +11,7 @@ dp = Dispatcher(bot, loop=loop)
 admin_id = os.getenv("ADMIN_ID")
 airtable_base_id = os.getenv("AIRTABLE_BASE_ID")
 airtable_api_key = os.getenv("AIRTABLE_API_KEY")
+payments_provider_token = os.getenv("PROVIDER_TOKEN")
 
 if __name__ == "__main__":
     from handlers import dp, send_to_admin_start
