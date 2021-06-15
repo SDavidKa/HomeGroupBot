@@ -3,7 +3,7 @@ from aiogram.types import ReplyKeyboardMarkup, KeyboardButton
 # Группировка кнопок для Меню
 menu_kb = ReplyKeyboardMarkup(keyboard=[
     [
-        KeyboardButton('Материалы'),
+        KeyboardButton('Конспекты'),
         KeyboardButton('Расписание')
     ],
     [

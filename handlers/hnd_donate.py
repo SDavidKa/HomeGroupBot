@@ -100,7 +100,6 @@ async def getMenu(message: Message):
     await saveLastMessage(message, 'back to menu')
     await message.answer("Выбери необходимый пункт в меню", reply_markup=kb_menu.menu_kb)
     print(await getUserLogsFromMessage(message))
-    print(previous_message_text)
 
 # Обрабатываем сумму пожертваования
 @dp.message_handler()

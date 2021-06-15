@@ -1,17 +1,6 @@
-from aiogram.types import ReplyKeyboardMarkup, KeyboardButton, InlineKeyboardButton, InlineKeyboardMarkup
+from aiogram.types import InlineKeyboardButton, InlineKeyboardMarkup
 
 list_handlers_docs = list()
-
-# Группировка кнопок для Материалы
-resource_kb = ReplyKeyboardMarkup(keyboard=[
-    [
-        KeyboardButton('Конспекты'),
-        KeyboardButton('Вс. проповеди')
-    ],
-    [
-        KeyboardButton('Вернуться в меню')
-    ]
-], resize_keyboard=True)
 
 notes_menu_kb = InlineKeyboardMarkup(inline_keyboard=[
     [

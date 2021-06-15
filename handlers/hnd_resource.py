@@ -1,23 +1,10 @@
 from app import dp
-from aiogram.types import Message, InputFile, CallbackQuery
+from aiogram.types import InputFile, CallbackQuery
 from keyboards import kb_resource as rs
-from modules import getAirtableData, getUserLogsFromMessage, getUserLogsFromCallbackQuery
+from modules import getAirtableData, getUserLogsFromCallbackQuery
 
 # Глобальная переменная
 table_state = dict()
-
-# Выдача конспектов воскресной проповеди
-@dp.message_handler(text='Вс. проповеди')
-async def getPreaching(message: Message):
-    await message.answer("Тема 1\nНазвание конспекта 1")
-    print(await getUserLogsFromMessage(message))
-
-# Выдача конспектов
-@dp.message_handler(text='Конспекты')
-async def getNotes(message: Message):
-    await message.answer("Выбери таблицу", reply_markup=rs.notes_menu_kb)
-    table_state['message_id'] = message.message_id
-    print(await getUserLogsFromMessage(message))
 
 @dp.callback_query_handler(text="Главные документы")
 async def getNotesFromTableMainDocs(call: CallbackQuery):
